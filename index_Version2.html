@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Nightfall Calculator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0b0d12;
+      color: #f8fafc;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 280px;
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+      background:
+        radial-gradient(ellipse at 18% 15%, #20234a 0, transparent 38%),
+        radial-gradient(ellipse at 85% 85%, #153b3a 0, transparent 34%),
+        #0b0d12;
+    }
+
+    .calculator {
+      width: min(100%, 380px);
+      padding: clamp(20px, 5vw, 28px);
+      border: 1px solid #ffffff12;
+      border-radius: 30px;
+      background: linear-gradient(145deg, #1a1d27ed, #11131bef);
+      box-shadow:
+        0 30px 80px #0009,
+        inset 0 1px 0 #ffffff12;
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #9b8cff, #5c7cfa);
+      box-shadow: 0 4px 18px #796cff55;
+      font-size: 1rem;
+    }
+
+    .status {
+      color: #71798a;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .display {
+      min-height: 132px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      overflow: hidden;
+      padding: 12px 4px 24px;
+      text-align: right;
+    }
+
+    .calculation {
+      width: 100%;
+      min-height: 25px;
+      overflow: hidden;
+      color: #81899a;
+      font-size: clamp(0.9rem, 4vw, 1.05rem);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result {
+      width: 100%;
+      overflow: hidden;
+      color: #f8fafc;
+      font-size: clamp(2.8rem, 12vw, 4rem);
+      font-weight: 350;
+      letter-spacing: -0.07em;
+      line-height: 1.15;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(9px, 3vw, 14px);
+    }
+
+    button {
+      min-width: 0;
+      min-height: clamp(58px, 16vw, 72px);
+      border: 1px solid #ffffff08;
+      border-radius: 22px;
+      background: #252833;
+      color: #f1f3f8;
+      font: inherit;
+      font-size: clamp(1.15rem, 5vw, 1.4rem);
+      font-weight: 500;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        transform 140ms ease,
+        background-color 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: #ffffff19;
+      background: #303440;
+      box-shadow: 0 8px 18px #0003;
+    }
+
+    button:active {
+      transform: scale(0.94);
+      box-shadow: none;
+    }
+
+    button:focus-visible {
+      outline: 2px solid #a99bff;
+      outline-offset: 3px;
+    }
+
+    .utility {
+      background: #30333e;
+      color: #c3c8d4;
+    }
+
+    .delete {
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    .operator {
+      background: #29263a;
+      color: #b6a8ff;
+    }
+
+    .operator:hover {
+      background: #39334e;
+    }
+
+    .operator.selected {
+      background: #7866ec;
+      color: white;
+      box-shadow: 0 5px 20px #7866ec44;
+    }
+
+    .equals {
+      border-color: transparent;
+      background: linear-gradient(135deg, #9b8cff, #6e6af6);
+      color: white;
+      font-size: 1.65rem;
+      box-shadow: 0 8px 22px #7667ed3b;
+    }
+
+    .equals:hover {
+      border-color: #ffffff35;
+      background: linear-gradient(135deg, #aa9eff, #817cff);
+      box-shadow: 0 10px 26px #7667ed55;
+    }
+
+    .zero {
+      grid-column: span 2;
+      text-align: left;
+      padding-left: 27px;
+    }
+
+    .hint {
+      margin: 20px 0 0;
+      color: #626a7b;
+      font-size: 0.72rem;
+      text-align: center;
+    }
+
+    @media (max-width: 360px) {
+      .calculator {
+        border-radius: 24px;
+      }
+
+      button {
+        border-radius: 18px;
+      }
+
+      .hint {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator" aria-label="Calculator">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✳</span>
+        <span>Nightfall</span>
+      </div>
+      <span class="status">Calculator</span>
+    </header>
+
+    <section class="display" aria-live="polite" aria-atomic="true">
+      <div class="calculation" id="calculation"></div>
+      <div class="result" id="result">0</div>
+    </section>
+
+    <section class="keys" aria-label="Calculator buttons">
+      <button class="utility" data-action="clear" aria-label="Clear">C</button>
+      <button class="utility" data-action="percent" aria-label="Percent">%</button>
+      <button class="utility delete" data-action="delete" aria-label="Delete">DEL</button>
+      <button class="operator" data-operator="/" aria-label="Divide">÷</button>
+
+      <button data-digit="7">7</button>
+      <button data-digit="8">8</button>
+      <button data-digit="9">9</button>
+      <button class="operator" data-operator="*" aria-label="Multiply">×</button>
+
+      <button data-digit="4">4</button>
+      <button data-digit="5">5</button>
+      <button data-digit="6">6</button>
+      <button class="operator" data-operator="-" aria-label="Subtract">−</button>
+
+      <button data-digit="1">1</button>
+      <button data-digit="2">2</button>
+      <button data-digit="3">3</button>
+      <button class="operator" data-operator="+" aria-label="Add">+</button>
+
+      <button class="zero" data-digit="0">0</button>
+      <button data-action="decimal" aria-label="Decimal point">.</button>
+      <button class="equals" data-action="equals" aria-label="Equals">=</button>
+    </section>
+
+    <p class="hint">Tip: use your keyboard, too</p>
+  </main>
+
+  <script>
+    const resultDisplay = document.getElementById("result");
+    const calculationDisplay = document.getElementById("calculation");
+    const keys = document.querySelector(".keys");
+
+    let currentInput = "0";
+    let storedValue = null;
+    let pendingOperator = null;
+    let waitingForInput = false;
+    let justCalculated = false;
+
+    const symbols = {
+      "/": "÷",
+      "*": "×",
+      "-": "−",
+      "+": "+"
+    };
+
+    function formatNumber(value) {
+      if (!Number.isFinite(value)) return "Error";
+      const rounded = Number(value.toPrecision(11));
+      return String(rounded);
+    }
+
+    function updateDisplay() {
+      resultDisplay.textContent = currentInput;
+    }
+
+    function clearAll() {
+      currentInput = "0";
+      storedValue = null;
+      pendingOperator = null;
+      waitingForInput = false;
+      justCalculated = false;
+      calculationDisplay.textContent = "";
+      document.querySelectorAll(".operator").forEach(button => {
+        button.classList.remove("selected");
+      });
+      updateDisplay();
+    }
+
+    function inputDigit(digit) {
+      if (currentInput === "Error" || waitingForInput || justCalculated) {
+        currentInput = digit;
+        waitingForInput = false;
+        justCalculated = false;
+        if (storedValue === null) calculationDisplay.textContent = "";
+      } else {
+        currentInput = currentInput === "0" ? digit : currentInput + digit;
+      }
+      updateDisplay();
+    }
+
+    function inputDecimal() {
+      if (currentInput === "Error" || waitingForInput || justCalculated) {
+        currentInput = "0.";
+        waitingForInput = false;
+        justCalculated = false;
+        if (storedValue === null) calculationDisplay.textContent = "";
+      } else if (!currentInput.includes(".")) {
+        currentInput += ".";
+      }
+      updateDisplay();
+    }
+
+    function calculate(a, b, operator) {
+      switch (operator) {
+        case "+": return a + b;
+        case "-": return a - b;
+        case "*": return a * b;
+        case "/": return b === 0 ? NaN : a / b;
+        default: return b;
+      }
+    }
+
+    function chooseOperator(operator) {
+      if (currentInput === "Error") return;
+
+      const inputValue = Number(currentInput);
+
+      if (pendingOperator && !waitingForInput) {
+        const answer = calculate(storedValue, inputValue, pendingOperator);
+        if (!Number.isFinite(answer)) {
+          showError();
+          return;
+        }
+        storedValue = Number(formatNumber(answer));
+        currentInput = formatNumber(storedValue);
+      } else if (storedValue === null || justCalculated) {
+        storedValue = inputValue;
+      }
+
+      pendingOperator = operator;
+      waitingForInput = true;
+      justCalculated = false;
+      calculationDisplay.textContent = `${formatNumber(storedValue)} ${symbols[operator]}`;
+
+      document.querySelectorAll(".operator").forEach(button => {
+        button.classList.toggle("selected", button.dataset.operator === operator);
+      });
+      updateDisplay();
+    }
+
+    function showError() {
+      currentInput = "Error";
+      storedValue = null;
+      pendingOperator = null;
+      waitingForInput = true;
+      justCalculated = true;
+      calculationDisplay.textContent = "Cannot divide by zero";
+      document.querySelectorAll(".operator").forEach(button => {
+        button.classList.remove("selected");
+      });
+      updateDisplay();
+    }
+
+    function getResult() {
+      if (!pendingOperator || storedValue === null || currentInput === "Error") return;
+
+      const first = storedValue;
+      const second = Number(currentInput);
+      const operator = pendingOperator;
+      const answer = calculate(first, second, operator);
+
+      if (!Number.isFinite(answer)) {
+        showError();
+        return;
+      }
+
+      const formattedAnswer = formatNumber(answer);
+      calculationDisplay.textContent =
+        `${formatNumber(first)} ${symbols[operator]} ${formatNumber(second)} =`;
+
+      currentInput = formattedAnswer;
+      storedValue = null;
+      pendingOperator = null;
+      waitingForInput = true;
+      justCalculated = true;
+
+      document.querySelectorAll(".operator").forEach(button => {
+        button.classList.remove("selected");
+      });
+      updateDisplay();
+    }
+
+    function applyPercent() {
+      if (currentInput === "Error") return;
+      currentInput = formatNumber(Number(currentInput) / 100);
+      waitingForInput = false;
+      justCalculated = false;
+      updateDisplay();
+    }
+
+    function deleteLast() {
+      if (currentInput === "Error" || justCalculated) {
+        currentInput = "0";
+        justCalculated = false;
+        calculationDisplay.textContent = "";
+      } else if (!waitingForInput) {
+        currentInput = currentInput.length > 1
+          ? currentInput.slice(0, -1)
+          : "0";
+        if (currentInput === "-") currentInput = "0";
+      }
+      updateDisplay();
+    }
+
+    function handleAction(action) {
+      switch (action) {
+        case "clear": clearAll(); break;
+        case "delete": deleteLast(); break;
+        case "decimal": inputDecimal(); break;
+        case "percent": applyPercent(); break;
+        case "equals": getResult(); break;
+      }
+    }
+
+    keys.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      if (button.dataset.digit !== undefined) {
+        inputDigit(button.dataset.digit);
+      } else if (button.dataset.operator) {
+        chooseOperator(button.dataset.operator);
+      } else if (button.dataset.action) {
+        handleAction(button.dataset.action);
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (/^[0-9]$/.test(event.key)) {
+        inputDigit(event.key);
+      } else if (event.key === ".") {
+        inputDecimal();
+      } else if (["+", "-", "*", "/"].includes(event.key)) {
+        chooseOperator(event.key);
+      } else if (event.key === "%") {
+        applyPercent();
+      } else if (event.key === "Enter" || event.key === "=") {
+        event.preventDefault();
+        getResult();
+      } else if (event.key === "Backspace") {
+        deleteLast();
+      } else if (event.key === "Escape") {
+        clearAll();
+      }
+    });
+  </script>
+</body>
+</html>
